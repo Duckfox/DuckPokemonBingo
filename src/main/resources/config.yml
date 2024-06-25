@@ -1,0 +1,312 @@
+# 前缀
+prefix: "&2[&eDuckPokemonBingo&2]"
+# 测试性功能-界面内显示信息
+# 这个选项打开了没什么用，就是在界面的右下角使用UIElement来展示最新的消息，但是大小是固定的，而且有长达1秒的延迟
+# 不建议开启，为测试性功能
+inGuiInfo: false
+# 标签
+tag:
+  # 如果宝可梦有这个标签，那么它就无法被上传
+  cannotUploadTag: "duckPokemonBingo.used"
+# 自动保存
+autosave:
+  # 自动保存间隔 分钟为单位
+  period: 10
+# yaml的钩子方便书写
+rewards:
+  RV1: &rv1
+    # 奖励的唯一标识符，每个冰菓配置内请勿重复
+    id: RV1
+    # 奖励名称，会显示在冰菓界面的name中，支持placeholder
+    name: "竖排奖励1 %status%"
+    # 对应在冰菓界面中的位置
+    slot: 46
+    # 领取奖励需要达成的条件，数字代表冰菓宝可梦的序号从1开始到25
+    conditions: [ 1,6,11,16,21 ]
+  RV2: &rv2
+    id: RV2
+    name: "竖排奖励2 %status%"
+    slot: 47
+    conditions: [ 2,7,12,17,22 ]
+  RV3: &rv3
+    id: RV3
+    name: "竖排奖励3 %status%"
+    slot: 48
+    conditions: [ 3,8,13,18,23 ]
+  RV4: &rv4
+    id: RV4
+    name: "竖排奖励4 %status%"
+    slot: 49
+    conditions: [ 4,9,14,19,24 ]
+  RV5: &rv5
+    id: RV5
+    name: "竖排奖励5 %status%"
+    slot: 50
+    conditions: [ 5,10,15,20,25 ]
+  RH1: &rh1
+    id: RH1
+    name: "横排奖励1 %status%"
+    description:
+      - "横排奖励"
+    slot: 0
+    conditions: [ 1,6,11,16,21 ]
+  RH2: &rh2
+    id: RH2
+    name: "横排奖励2 %status%"
+    slot: 9
+    conditions: [ 2,7,12,17,22 ]
+  RH3: &rh3
+    id: RH3
+    name: "横排奖励3 %status%"
+    slot: 18
+    conditions: [ 3,8,13,18,23 ]
+  RH4: &rh4
+    id: RH4
+    name: "横排奖励4 %status%"
+    slot: 27
+    conditions: [ 4,9,14,19,24 ]
+  RH5: &rh5
+    id: RH5
+    name: "横排奖励5 %status%"
+    slot: 36
+    conditions: [ 5,10,15,20,25 ]
+  RF: &rf
+    id: RF
+    name: "最终奖励 %status%"
+    slot: 45
+    conditions: [ 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25 ]
+# 冰菓配置
+bingo:
+  # 可以有多个冰菓，每一个冰菓都是独立的
+  poolBingo:
+    # 冰菓类型
+    # 1. pool 宝可梦池 >> 在指定的池子内随机冰菓，需要给定池子
+    # 2. common 普通冰菓 >> 在设定的最小编号和最大编号直接随机冰菓，需要给定最小编号和最大编号，可以设置是否神兽、是否异兽、黑名单
+    type: "pool"
+    # 冰菓唯一标识符 请不要重复此项
+    id: "poolBingo"
+    # 冰菓名称 会显示在冰菓界面的Title
+    name: "&6宝可梦池冰菓收集"
+    # 上传方式
+    # 1. remove 删除 >> 上传之后直接删除
+    # 2. add_tag 添加标签 >> 上传之后不会删除，而是会给宝可梦添加标签，需要指定标签tag
+    uploadType: "add_tag"
+    # 标签
+    # 如果上传方式选择了add_tag，那么需要本项，否则可以忽略不写
+    # 添加的标签，可以写多个，用分号;隔开
+    tag: "poolBingoTag;duckPokemonBingo.used"
+    # 是否检查初训家
+    # 如果此项为true则玩家必须上传初训家为自己的宝可梦
+    checkOriTrainer: true
+    # 如果冰菓类型选择了pool，那么需要本项，否则可以忽略不写
+    # 随机的宝可梦池
+    # 可填写中文名或英文名
+    pool:
+      - "妙蛙种子"
+      - "小火龙"
+      - "杰尼龟"
+      - "菊草叶"
+      - "火球鼠"
+      - "小锯鳄"
+    # 奖励配置
+    rewards:
+      RV1:
+        <<: *rv1
+        # 描述，会展示在界面中的lore
+        description:
+          - "竖排奖励"
+        # 奖励，支持placeholder，以控制台身份执行
+        rewards:
+          - "say 玩家%player_name% 完成了竖排1!"
+      RV2:
+        <<: *rv2
+        description:
+          - "竖排奖励"
+        rewards:
+          - "say 玩家%player_name% 完成了竖排2!"
+      RV3:
+        <<: *rv3
+        description:
+          - "竖排奖励"
+        rewards:
+          - "say 玩家%player_name% 完成了竖排3!"
+      RV4:
+        <<: *rv4
+        description:
+          - "竖排奖励"
+        rewards:
+          - "say 玩家%player_name% 完成了竖排4!"
+      RV5:
+        <<: *rv5
+        description:
+          - "竖排奖励"
+        rewards:
+          - "say 玩家%player_name% 完成了竖排5!"
+      RH1:
+        <<: *rh1
+        description:
+          - "横排奖励"
+        rewards:
+          - "say 玩家%player_name% 完成了横排1!"
+      RH2:
+        <<: *rh2
+        description:
+          - "横排奖励"
+        rewards:
+          - "say 玩家%player_name% 完成了横排2!"
+      RH3:
+        <<: *rh3
+        description:
+          - "横排奖励"
+        rewards:
+          - "say 玩家%player_name% 完成了横排3!"
+      RH4:
+        <<: *rh4
+        description:
+          - "横排奖励"
+        rewards:
+          - "say 玩家%player_name% 完成了横排4!"
+      RH5:
+        <<: *rh5
+        description:
+          - "横排奖励"
+        rewards:
+          - "say 玩家%player_name% 完成了横排5!"
+      RF:
+        <<: *rf
+        description:
+          - "最终奖励"
+        rewards:
+          - "say 玩家%player_name% 完成了全部冰菓!"
+  allRandomBingo:
+    id: "commonBingo"
+    name: "&6普通冰菓收集"
+    type: "common"
+    uploadType: "remove"
+    checkOriTrainer: false
+    # 最小编号
+    # 如果冰菓类型选择了common，那么需要本项，否则可以忽略不写
+    minNdex: 1
+    # 最大编号
+    # 如果冰菓类型选择了common，那么需要本项，否则可以忽略不写
+    maxNdex: 905
+    # 是否允许神兽
+    # 如果冰菓类型选择了common，那么需要本项，否则可以忽略不写
+    # 如果忽略不写默认为false
+    canLegendary: false
+    # 是否允许异兽
+    # 如果冰菓类型选择了common，那么需要本项，否则可以忽略不写
+    # 如果忽略不写默认为false
+    canUltraBeast: false
+    # 黑名单
+    # 如果冰菓类型选择了common，那么需要本项，否则可以忽略不写
+    blackList:
+      - "劈斧螳螂"
+      - "大狃拉"
+      - "万针鱼"
+    rewards:
+      RV1:
+        <<: *rv1
+        description:
+          - "竖排奖励"
+        rewards:
+          - "say 玩家%player_name% 完成了竖排1!"
+      RV2:
+        <<: *rv2
+        description:
+          - "竖排奖励"
+        rewards:
+          - "say 玩家%player_name% 完成了竖排2!"
+      RV3:
+        <<: *rv3
+        description:
+          - "竖排奖励"
+        rewards:
+          - "say 玩家%player_name% 完成了竖排3!"
+      RV4:
+        <<: *rv4
+        description:
+          - "竖排奖励"
+        rewards:
+          - "say 玩家%player_name% 完成了竖排4!"
+      RV5:
+        <<: *rv5
+        description:
+          - "竖排奖励"
+        rewards:
+          - "say 玩家%player_name% 完成了竖排5!"
+      RH1:
+        <<: *rh1
+        description:
+          - "横排奖励"
+        rewards:
+          - "say 玩家%player_name% 完成了横排1!"
+      RH2:
+        <<: *rh2
+        description:
+          - "横排奖励"
+        rewards:
+          - "say 玩家%player_name% 完成了横排2!"
+      RH3:
+        <<: *rh3
+        description:
+          - "横排奖励"
+        rewards:
+          - "say 玩家%player_name% 完成了横排3!"
+      RH4:
+        <<: *rh4
+        description:
+          - "横排奖励"
+        rewards:
+          - "say 玩家%player_name% 完成了横排4!"
+      RH5:
+        <<: *rh5
+        description:
+          - "横排奖励"
+        rewards:
+          - "say 玩家%player_name% 完成了横排5!"
+      RF:
+        <<: *rf
+        description:
+          - "最终奖励"
+        rewards:
+          - "say 玩家%player_name% 完成了全部冰菓!"
+# 信息
+info:
+  bingo:
+    status:
+      # 冰菓收集状态
+      progressing: "进行中"
+      completed: "已完成"
+  reward:
+    status:
+      # 冰菓奖励完成状态,%progress%会返回 "收集数量/需求数量"
+      progressing: "进行中 [%progress%]"
+      completed: "已完成 [%progress%]"
+      can_claim: "可领取 [%progress%]"
+# 界面图标设置
+icons:
+  # 冰菓宝可梦图标
+  bingoPokemon:
+    # 可用参数: %pokemonName% => 宝可梦名称  %status% => 冰菓收集状态
+    name: "&b%pokemonName% %status%"
+    lore:
+      - "将宝可梦拖到这里上传！"
+  # 玻璃挡板
+  glassPane:
+    material: STAINED_GLASS_PANE
+    name: "玻璃板"
+    lore:
+      - ''
+  # 队伍里的宝可梦
+  partyPokemon:
+    # 可用参数: %pokemonName% => 宝可梦名称
+    name: "&b%pokemonName%"
+    lore:
+      - "点击将宝可梦拖到对应的冰菓上"
+  # 无宝可梦
+  noPokemon:
+    material: BARRIER
+    name: "无宝可梦"
+    lore:
+      - '无宝可梦'

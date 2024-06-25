@@ -1,0 +1,24 @@
+upload:
+  cannotUploadBecauseUploaded: "7c您不能再上传&c %pokemon% &c了，因为它已经被上传过了！"
+  alreadyUploaded: "&b%pokemon% &c已经收集过了！"
+  success: "&a成功上传了 &b%pokemon% !"
+  speciesMismatch: "&c您上传的宝可梦不匹配！您应上传 &a%bingoPokemon% &c而非 &b%pokemon%！"
+  oriTrainerMismatch: "&c您不是 &b%pokemon% &c的初训家！"
+reset:
+  singlePlayerSuccess: "&a成功重置了 &b%player% &a的 &b%bingo%."
+rewards:
+  alreadyClaimed: "&c您已经领取了此奖励！"
+  claim: "&a您领取了奖励！"
+  cannotClaim: "&c您现在还不能领取奖励！"
+inGuiText:
+  selectParty: "当前选中: %pokemon%"
+unknownBingoId: "&c未知冰菓 &b%id%&c."
+unknownPlayer: "&c未知玩家 &b%player%&c."
+unknownCommand: "&c未知指令 &b%command%&c ，请输入/dpb help查看帮助."
+reload: "&a插件重载完毕."
+help:
+  - "&bDuckPokemonBingo 帮助"
+  - "&71. &3/dpb &aopen &c<bingoId> &8>> &b打开指定bingo界面"
+  - "&72. &3/dpb &areset &c<bingoId> &7[player] &8>> &b重置全部或某个玩家的指定bingo"
+  - "&73. &3/dpb &areload &8>> &b重载插件"
+  - "&74. &3/dpb &ahelp &8>> &b查看帮助"
