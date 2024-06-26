@@ -73,12 +73,29 @@ public abstract class Bingo implements Savable, Comparable<Bingo> {
 
     public void updateAll(Player player, List<BingoPokemon> pokemons) {
         for (BingoPokemon pokemon : pokemons) {
-            update(player, pokemon);
+            update(player, pokemon,true);
         }
         try {
             save();
         } catch (IOException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    public void update(Player player, BingoPokemon pokemon,boolean isAll) {
+        if (!config.contains("bingo." + player.getUniqueId() + "." + pokemon.id)) {
+            config.createSection("bingo." + player.getUniqueId() + "." + pokemon.id);
+        }
+        ConfigurationSection section = config.getConfigurationSection("bingo." + player.getUniqueId() + "." + pokemon.id);
+        pokemon.save(section);
+        if (!isAll){
+            if (!DuckPokemonBingo.getConfigManager().getConfig().contains("saveImmediately") || DuckPokemonBingo.getConfigManager().getBoolean("saveImmediately")){
+                try {
+                    save();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
         }
     }
 
@@ -99,17 +116,14 @@ public abstract class Bingo implements Savable, Comparable<Bingo> {
         return pokemons;
     }
 
-    public void update(Player player, BingoPokemon pokemon) {
-        if (!config.contains("bingo." + player.getUniqueId() + "." + pokemon.id)) {
-            config.createSection("bingo." + player.getUniqueId() + "." + pokemon.id);
-        }
-        ConfigurationSection section = config.getConfigurationSection("bingo." + player.getUniqueId() + "." + pokemon.id);
-        pokemon.save(section);
-    }
-
     public void resetAll() {
         config.set("bingo", null);
         config.set("rewards", null);
+        try {
+            save();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         for (Player player : MainBingo.playerInventory.keySet()) {
             if (this.id.equals(MainBingo.playerInventory.get(player))) {
                 player.closeInventory();
@@ -121,6 +135,11 @@ public abstract class Bingo implements Savable, Comparable<Bingo> {
     public void resetPlayer(Player player) {
         config.set("bingo." + player.getUniqueId(), null);
         config.set("rewards." + player.getUniqueId(), null);
+        try {
+            save();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         if (MainBingo.playerInventory.containsKey(player)) {
             String bingoId = MainBingo.playerInventory.get(player);
             if (this.id.equals(bingoId)) {

@@ -12,6 +12,7 @@ import com.pixelmonmod.pixelmon.api.pokemon.Pokemon;
 import com.pixelmonmod.pixelmon.storage.PlayerPartyStorage;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -20,6 +21,7 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -102,7 +104,7 @@ public class MainBingo implements InventoryHolder, Listener {
                                             boolean result = bingo.uploadType.upload.upload(player, slot, pokemon, bingoPokemon, bingo);
                                             if (result) {
                                                 bingoPokemon.complete();
-                                                bingo.update(player, bingoPokemon);
+                                                bingo.update(player, bingoPokemon, false);
                                                 sendMsg(inventory, InfoType.INFO, player, "upload.success", "%pokemon%", pokemon.getDisplayName());
                                             }
                                         }
@@ -199,6 +201,10 @@ public class MainBingo implements InventoryHolder, Listener {
                     "%pokemonName%", pokemon.getLocalizedName(),
                     "%status%", bingoPokemon.status.getLocalizedName(), "%id%", String.valueOf(bingoPokemon.id));
             itemMeta.setLore(lore);
+            if (bingoPokemon.status == BingoPokemon.BingoStatus.COMPLETED) {
+                itemMeta.addEnchant(Enchantment.DAMAGE_ALL, 5, true);
+                itemMeta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+            }
             itemStack.setItemMeta(itemMeta);
             itemStack = NBTUtil.writeIntegerNBT(itemStack, "bingoPokemonId", bingoPokemon.id);
             itemStack = NBTUtil.writeStringNBT(itemStack, "bingoId", bingo.id);

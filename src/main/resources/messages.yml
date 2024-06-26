@@ -16,6 +16,7 @@ unknownBingoId: "&c未知冰菓 &b%id%&c."
 unknownPlayer: "&c未知玩家 &b%player%&c."
 unknownCommand: "&c未知指令 &b%command%&c ，请输入/dpb help查看帮助."
 reload: "&a插件重载完毕."
+save: "数据保存成功."
 help:
   - "&bDuckPokemonBingo 帮助"
   - "&71. &3/dpb &aopen &c<bingoId> &8>> &b打开指定bingo界面"

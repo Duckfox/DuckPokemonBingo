@@ -2,6 +2,7 @@ package com.duckfox.duckpokemonbingo.command;
 
 import com.duckfox.duckpokemonbingo.DuckPokemonBingo;
 import com.duckfox.duckpokemonbingo.api.bingo.Bingo;
+import com.duckfox.duckpokemonbingo.api.bingo.BingoPokemon;
 import com.duckfox.duckpokemonbingo.gui.MainBingo;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -13,7 +14,7 @@ import org.bukkit.entity.Player;
 import java.util.*;
 
 public class BingoCommand implements CommandExecutor, TabCompleter {
-    public static final List<String> COMMANDS = Arrays.asList("open", "reset", "help", "reload");
+    public static final List<String> COMMANDS = Arrays.asList("open", "reset", "help", "reload","save","status");
 
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String s, String[] args) {
@@ -57,10 +58,41 @@ public class BingoCommand implements CommandExecutor, TabCompleter {
             DuckPokemonBingo.instance.reload();
             DuckPokemonBingo.getMessageManager().sendMessage(commandSender, "reload");
             return true;
-        } else {
-            DuckPokemonBingo.getMessageManager().sendMessage(commandSender, "unknownCommand", "%command%", args.length >= 1 ? args[0] : "");
-            return false;
+        } else if (args.length >= 1 && "save".equalsIgnoreCase(args[0])) {
+            DuckPokemonBingo.saver.saveAll();
+            DuckPokemonBingo.getMessageManager().sendMessage(commandSender, "save");
+            return true;
+        } else if (commandSender.hasPermission("duckpokemonbingo.status") && args.length >= 2 && "status".equalsIgnoreCase(args[0])) {
+            Bingo bingo = DuckPokemonBingo.bingoManager.getBingo(args[1]);
+            if (bingo != null) {
+                if (args.length >= 3) {
+                    Player player = Bukkit.getPlayer(args[2]);
+                    if (player != null) {
+                        List<BingoPokemon> list = bingo.getPokemons(player);
+                        int i = 0;
+                        StringBuilder sb = new StringBuilder();
+                        for (BingoPokemon bingoPokemon : list) {
+                            i++;
+                            sb.append(bingoPokemon.status == BingoPokemon.BingoStatus.PROGRESSING ? "&c0 " : "&a1 ");
+                            if (i % 5 == 0) {
+                                sb.append("\n");
+                            }
+                        }
+                        DuckPokemonBingo.getMessageManager().sendMessage(player,sb.toString(),false);
+                        return true;
+                    } else {
+                        DuckPokemonBingo.getMessageManager().sendMessage(commandSender, "unknownPlayer", "%player%", args[2]);
+                        return false;
+                    }
+                }
+            } else {
+                DuckPokemonBingo.getMessageManager().sendMessage(commandSender, "unknownBingoId", "%id%", args[1]);
+                return false;
+            }
         }
+        DuckPokemonBingo.getMessageManager().sendMessage(commandSender, "unknownCommand", "%command%", args.length >= 1 ? args[0] : "");
+        return false;
+
     }
 
     @Override
@@ -72,7 +104,7 @@ public class BingoCommand implements CommandExecutor, TabCompleter {
             return list;
         }
         if (args.length == 2) {
-            if ("reset".equalsIgnoreCase(args[0]) || "open".equalsIgnoreCase(args[0])) {
+            if ("reset".equalsIgnoreCase(args[0]) || "open".equalsIgnoreCase(args[0]) || "status".equalsIgnoreCase(args[0])) {
                 Set<Bingo> bingoSet = DuckPokemonBingo.bingoManager.getBingoSet();
                 List<String> list = new ArrayList<>(bingoSet.size());
                 for (Bingo bingo : bingoSet) {
