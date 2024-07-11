@@ -10,6 +10,8 @@ rewards:
   alreadyClaimed: "&c您已经领取了此奖励！"
   claim: "&a您领取了奖励！"
   cannotClaim: "&c您现在还不能领取奖励！"
+status:
+  empty: "玩家数据为空"
 inGuiText:
   selectParty: "当前选中: %pokemon%"
 unknownBingoId: "&c未知冰菓 &b%id%&c."
@@ -23,3 +25,5 @@ help:
   - "&72. &3/dpb &areset &c<bingoId> &7[player] &8>> &b重置全部或某个玩家的指定bingo"
   - "&73. &3/dpb &areload &8>> &b重载插件"
   - "&74. &3/dpb &ahelp &8>> &b查看帮助"
+  - "&75. &3/dpb &astatus &c<bingoId> <player> &8>> &b查看某个玩家的冰菓收集情况"
+  - "&76. &3/dpb &asave &8>> &b保存数据"

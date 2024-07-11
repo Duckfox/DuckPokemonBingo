@@ -73,7 +73,7 @@ public abstract class Bingo implements Savable, Comparable<Bingo> {
 
     public void updateAll(Player player, List<BingoPokemon> pokemons) {
         for (BingoPokemon pokemon : pokemons) {
-            update(player, pokemon,true);
+            update(player, pokemon, true);
         }
         try {
             save();
@@ -82,14 +82,14 @@ public abstract class Bingo implements Savable, Comparable<Bingo> {
         }
     }
 
-    public void update(Player player, BingoPokemon pokemon,boolean isAll) {
+    public void update(Player player, BingoPokemon pokemon, boolean isAll) {
         if (!config.contains("bingo." + player.getUniqueId() + "." + pokemon.id)) {
             config.createSection("bingo." + player.getUniqueId() + "." + pokemon.id);
         }
         ConfigurationSection section = config.getConfigurationSection("bingo." + player.getUniqueId() + "." + pokemon.id);
         pokemon.save(section);
-        if (!isAll){
-            if (!DuckPokemonBingo.getConfigManager().getConfig().contains("saveImmediately") || DuckPokemonBingo.getConfigManager().getBoolean("saveImmediately")){
+        if (!isAll) {
+            if (!DuckPokemonBingo.getConfigManager().getConfig().contains("saveImmediately") || DuckPokemonBingo.getConfigManager().getBoolean("saveImmediately")) {
                 try {
                     save();
                 } catch (IOException e) {
@@ -109,9 +109,12 @@ public abstract class Bingo implements Savable, Comparable<Bingo> {
 
     public List<BingoPokemon> getPokemons(Player player) {
         List<BingoPokemon> pokemons = new ArrayList<>();
-        Set<String> keys = config.getConfigurationSection("bingo." + player.getUniqueId()).getKeys(false);
-        for (String key : keys) {
-            pokemons.add(new BingoPokemon(config.getConfigurationSection("bingo." + player.getUniqueId() + "." + key)));
+        ConfigurationSection section = config.getConfigurationSection("bingo." + player.getUniqueId());
+        if (section != null) {
+            Set<String> keys = section.getKeys(false);
+            for (String key : keys) {
+                pokemons.add(new BingoPokemon(config.getConfigurationSection("bingo." + player.getUniqueId() + "." + key)));
+            }
         }
         return pokemons;
     }

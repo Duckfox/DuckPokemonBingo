@@ -221,7 +221,8 @@ public class MainBingo implements InventoryHolder, Listener {
             if (pokemon != null) {
                 itemStack = PokemonUtil.getPhoto(pokemon);
                 ItemMeta itemMeta = itemStack.getItemMeta();
-                itemMeta.setDisplayName(DuckPokemonBingo.getConfigManager().getString("icons.partyPokemon.name", player, "%pokemonName%", pokemon.getDisplayName()));
+                itemMeta.setDisplayName(DuckPokemonBingo.getConfigManager().getString("icons.partyPokemon.name", player, "%pokemonName%", pokemon.getDisplayName(), "{slot}", String.valueOf(i + 1)));
+                itemMeta.setLore(DuckPokemonBingo.getConfigManager().getStringList("icons.partyPokemon.lore", player, "%pokemonName%", pokemon.getDisplayName(), "{slot}", String.valueOf(i + 1)));
                 itemStack.setItemMeta(itemMeta);
                 itemStack = NBTUtil.writeIntegerNBT(itemStack, "partySlot", i);
             } else {

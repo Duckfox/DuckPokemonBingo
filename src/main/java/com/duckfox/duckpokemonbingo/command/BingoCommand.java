@@ -12,9 +12,10 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class BingoCommand implements CommandExecutor, TabCompleter {
-    public static final List<String> COMMANDS = Arrays.asList("open", "reset", "help", "reload","save","status");
+    public static final List<String> COMMANDS = Arrays.asList("open", "reset", "help", "reload", "save", "status");
 
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String s, String[] args) {
@@ -78,7 +79,7 @@ public class BingoCommand implements CommandExecutor, TabCompleter {
                                 sb.append("\n");
                             }
                         }
-                        DuckPokemonBingo.getMessageManager().sendMessage(player,sb.toString(),false);
+                        DuckPokemonBingo.getMessageManager().sendMessage(commandSender, sb.toString().isEmpty() ? "status.empty" : sb.toString(), sb.toString().isEmpty());
                         return true;
                     } else {
                         DuckPokemonBingo.getMessageManager().sendMessage(commandSender, "unknownPlayer", "%player%", args[2]);
@@ -94,7 +95,6 @@ public class BingoCommand implements CommandExecutor, TabCompleter {
         return false;
 
     }
-
     @Override
     public List<String> onTabComplete(CommandSender commandSender, Command command, String s, String[] args) {
 
@@ -112,6 +112,13 @@ public class BingoCommand implements CommandExecutor, TabCompleter {
                 }
                 list.removeIf(s1 -> !s1.startsWith(args[1].toLowerCase()));
                 return list;
+            }
+        }
+        if (args.length == 3) {
+            if ("reset".equalsIgnoreCase(args[0]) || "status".equalsIgnoreCase(args[0])) {
+                List<String> players = new ArrayList<>(Bukkit.getOnlinePlayers()).stream().map(Player::getName).collect(Collectors.toList());
+                players.removeIf((player) -> !player.toLowerCase().startsWith(args[2].toLowerCase()));
+                return players;
             }
         }
         return Collections.emptyList();

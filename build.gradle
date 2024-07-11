@@ -16,12 +16,16 @@ repositories {
         url = "https://oss.sonatype.org/content/groups/public/"
     }
     maven {
+        url = 'https://repo.extendedclip.com/content/repositories/placeholderapi/'
+    }
+    maven {
         url "https://raw.github.com/Duckfox/maven-repository/master/"
     }
 }
 
 dependencies {
     compileOnly "org.spigotmc:spigot-api:1.12.2-R0.1-SNAPSHOT"
+    compileOnly 'me.clip:placeholderapi:2.11.3'
     implementation 'com.duckfox:duckapi:2.73'
     implementation 'org.catmc:catserversrg:11c12cd'
     implementation 'com.pixelmonmod:pixelmon:8.4.3'
