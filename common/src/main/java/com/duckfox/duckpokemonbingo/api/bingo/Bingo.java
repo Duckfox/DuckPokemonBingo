@@ -1,13 +1,10 @@
 package com.duckfox.duckpokemonbingo.api.bingo;
 
 import com.duckfox.duckapi.utils.FileUtil;
-import com.duckfox.duckapi.utils.PokemonUtil;
 import com.duckfox.duckpokemonbingo.DuckPokemonBingo;
 import com.duckfox.duckpokemonbingo.api.Savable;
 import com.duckfox.duckpokemonbingo.gui.MainBingo;
 import com.pixelmonmod.pixelmon.api.pokemon.Pokemon;
-import com.pixelmonmod.pixelmon.enums.EnumSpecies;
-import com.pixelmonmod.pixelmon.storage.PlayerPartyStorage;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -17,12 +14,10 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Function;
 
 public abstract class Bingo implements Savable, Comparable<Bingo> {
     public final File file;
@@ -211,23 +206,21 @@ public abstract class Bingo implements Savable, Comparable<Bingo> {
 
     public enum UploadType {
         REMOVE((player, slot, pokemon, bingoPokemon, bingo) -> {
-            PlayerPartyStorage party = PokemonUtil.getParty(player);
-            party.set(slot, null);
+            Object party = DuckPokemonBingo.getVersionController().getParty(player);
+            DuckPokemonBingo.getVersionController().partySet(party, slot, null);
             return true;
         }),
         ADD_TAG((player, slot, pokemon, bingoPokemon, bingo) -> {
             if (bingo.tag != null) {
                 String[] split = bingo.tag.split(";");
                 for (String s : split) {
-                    pokemon.addSpecFlag(s);
+                    DuckPokemonBingo.getVersionController().addFlag(pokemon, s);
                 }
             }
 
             return true;
         }),
-        NOTHING((player, slot, pokemon, bingoPokemon, bingo) -> {
-            return true;
-        });
+        NOTHING((player, slot, pokemon, bingoPokemon, bingo) -> true);
         public final Upload upload;
 
         UploadType(Upload upload) {

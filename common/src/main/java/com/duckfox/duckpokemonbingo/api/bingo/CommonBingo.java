@@ -1,13 +1,11 @@
 package com.duckfox.duckpokemonbingo.api.bingo;
 
 import com.duckfox.duckapi.utils.RandomUtil;
-import com.pixelmonmod.pixelmon.enums.EnumSpecies;
-import org.bukkit.configuration.Configuration;
+import com.duckfox.duckpokemonbingo.DuckPokemonBingo;
 import org.bukkit.configuration.ConfigurationSection;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 public class CommonBingo extends Bingo {
     public int minNdex;
@@ -28,23 +26,23 @@ public class CommonBingo extends Bingo {
         List<BingoPokemon> list = new ArrayList<>();
         int id = 1;
         while (list.size() < 25){
-            EnumSpecies enumspecies;
+            Object species;
             while (true){
                 int randInt = RandomUtil.getRandomIntInclusive(minNdex,maxNdex);
-                EnumSpecies fromDex = EnumSpecies.getFromDex(randInt);
-                if (fromDex.isLegendary() && !canLegendary){
+                Object fromDex = DuckPokemonBingo.getVersionController().getSpeciesFromDex(randInt);
+                if (DuckPokemonBingo.getVersionController().isSpeciesLegendary(fromDex) && !canLegendary){
                     continue;
                 }
-                if (fromDex.isUltraBeast() && !canUltraBeast){
+                if (DuckPokemonBingo.getVersionController().isSpeciesUltraBeast(fromDex) && !canUltraBeast){
                     continue;
                 }
-                if (blackList.contains(fromDex.getPokemonName()) || blackList.contains(fromDex.getLocalizedName())){
+                if (blackList.contains(DuckPokemonBingo.getVersionController().getSpeciesPokemonName(fromDex)) || blackList.contains(DuckPokemonBingo.getVersionController().getSpeciesLocalizedName(fromDex))){
                     continue;
                 }
-                enumspecies = fromDex;
+                species = fromDex;
                 break;
             }
-            list.add(new BingoPokemon(id++,enumspecies, BingoPokemon.BingoStatus.PROGRESSING,this));
+            list.add(new BingoPokemon(id++,species, BingoPokemon.BingoStatus.PROGRESSING,this));
         }
         return list;
     }

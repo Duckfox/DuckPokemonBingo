@@ -1,15 +1,15 @@
 package com.duckfox.duckpokemonbingo.gui;
 
-import com.duckfox.duckapi.utils.NBTUtil;
+import com.duckfox.duckapi.nms.ItemStackProxy;
+import com.duckfox.duckapi.nms.NBTProxy;
+import com.duckfox.duckapi.nms.Version;
 import com.duckfox.duckapi.utils.PokemonUtil;
 import com.duckfox.duckapi.utils.StringUtil;
 import com.duckfox.duckpokemonbingo.DuckPokemonBingo;
 import com.duckfox.duckpokemonbingo.api.bingo.Bingo;
 import com.duckfox.duckpokemonbingo.api.bingo.BingoPokemon;
 import com.duckfox.duckpokemonbingo.api.bingo.BingoReward;
-import com.pixelmonmod.pixelmon.Pixelmon;
 import com.pixelmonmod.pixelmon.api.pokemon.Pokemon;
-import com.pixelmonmod.pixelmon.storage.PlayerPartyStorage;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -18,7 +18,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.event.inventory.InventoryOpenEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.server.ServerLoadEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemFlag;
@@ -26,6 +27,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.awt.*;
+import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -33,7 +35,7 @@ import java.util.Map;
 
 public class MainBingo implements InventoryHolder, Listener {
     public static final MainBingo INSTANCE = new MainBingo();
-    public static final Map<Player, String> playerInventory = Collections.synchronizedMap(new HashMap<Player, String>());
+    public static final Map<Player, String> playerInventory = Collections.synchronizedMap(new HashMap<>());
 
     @Override
     public Inventory getInventory() {
@@ -47,7 +49,7 @@ public class MainBingo implements InventoryHolder, Listener {
 
         {
             Material material = Material.matchMaterial(DuckPokemonBingo.getConfigManager().getString("icons.glassPane.material", player));
-            ItemStack itemStack = new ItemStack(material != null ? material : Material.STAINED_GLASS_PANE);
+            ItemStack itemStack = new ItemStack(material != null ? material : Version.getVersion() == Version.V1_12_2 ? Material.STAINED_GLASS_PANE : Material.matchMaterial("WHITE_STAINED_GLASS_PANE"));
             ItemMeta itemMeta = itemStack.getItemMeta();
             String name = DuckPokemonBingo.getConfigManager().getString("icons.glassPane.name", player);
             itemMeta.setDisplayName(name);
@@ -64,10 +66,14 @@ public class MainBingo implements InventoryHolder, Listener {
     }
 
     private static void refreshInGuiInfo(Inventory inventory, String text, InfoType type) {
-        if (DuckPokemonBingo.getConfigManager().getBoolean("inGuiInfo")) {
+        if (Version.getVersion().isVersion(Version.V1_12_2) && DuckPokemonBingo.getConfigManager().getBoolean("inGuiInfo")) {
             ItemStack textInfo = PokemonUtil.getTextInfo(1000, 1000, type.color.getRed(), type.color.getGreen(), type.color.getBlue(), type.color.getAlpha(), text, 0D, 0D, 20D, -200, 20);
             inventory.setItem(53, textInfo);
         }
+    }
+
+    public boolean hasKey(ItemStack itemStack, String key) {
+        return NBTProxy.hasKey(ItemStackProxy.getNBT(itemStack), key);
     }
 
     @EventHandler
@@ -78,27 +84,28 @@ public class MainBingo implements InventoryHolder, Listener {
             Player player = (Player) event.getWhoClicked();
             event.setCancelled(true);
             ItemStack cursor = event.getCursor();
-            PlayerPartyStorage party = PokemonUtil.getParty(player);
+            Object party = DuckPokemonBingo.getVersionController().getParty(player);
             //先进行鼠标判断 如果鼠标上的是队伍宝可梦
-            if (cursor != null && NBTUtil.hasKey(cursor, "partySlot")) {
+            if (cursor != null && hasKey(cursor, "partySlot")) {
                 player.setItemOnCursor(null);
                 // 读取slot
-                int slot = NBTUtil.readIntegerNBT(cursor, "partySlot");
+                int slot = ItemStackProxy.readIntegerNBT(cursor, "partySlot");
                 // 如果点击的是冰菓宝可梦
-                if (clicked.getType() != Material.AIR && NBTUtil.hasKey(clicked, "bingoId")) {
-                    String bingoId = NBTUtil.readStringNBT(clicked, "bingoId");
-                    int bingoPokemonId = NBTUtil.readIntegerNBT(clicked, "bingoPokemonId");
+                if (clicked!=null && clicked.getType() != Material.AIR && hasKey(clicked, "bingoId")) {
+                    String bingoId = ItemStackProxy.readStringNBT(clicked, "bingoId");
+                    int bingoPokemonId = ItemStackProxy.readIntegerNBT(clicked, "bingoPokemonId");
                     Bingo bingo = DuckPokemonBingo.bingoManager.getBingo(bingoId);
                     if (bingo != null) {
-                        Pokemon pokemon = party.get(slot);
+                        Pokemon pokemon = DuckPokemonBingo.getVersionController().partyGet(party, slot);
                         if (pokemon != null) {
                             BingoPokemon bingoPokemon = bingo.getPokemons(player).get(bingoPokemonId - 1);
                             if (bingoPokemon.status == BingoPokemon.BingoStatus.COMPLETED) {
-                                sendMsg(inventory, InfoType.ERROR, player, "upload.alreadyUploaded", "%pokemon%", bingoPokemon.species.getLocalizedName());
+                                sendMsg(inventory, InfoType.ERROR, player, "upload.alreadyUploaded", "%pokemon%", DuckPokemonBingo.getVersionController().getSpeciesLocalizedName(bingoPokemon.species));
                             } else {
-                                if (bingoPokemon.species == pokemon.getSpecies()) {
+                                if (DuckPokemonBingo.getVersionController().isSpecies(pokemon, bingoPokemon.species)) {
                                     if (!bingo.checkOriTrainer || player.getUniqueId().equals(pokemon.getOriginalTrainerUUID())) {
-                                        if (pokemon.hasSpecFlag(DuckPokemonBingo.getConfigManager().getString("tag.cannotUploadTag"))) {
+                                        String flag = DuckPokemonBingo.getConfigManager().getString("tag.cannotUploadTag");
+                                        if (DuckPokemonBingo.getVersionController().hasFlag(pokemon, flag)) {
                                             DuckPokemonBingo.getMessageManager().sendMessage(player, "upload.cannotUploadBecauseUploaded", "%pokemon%", pokemon.getDisplayName());
                                         } else {
                                             boolean result = bingo.uploadType.upload.upload(player, slot, pokemon, bingoPokemon, bingo);
@@ -114,7 +121,7 @@ public class MainBingo implements InventoryHolder, Listener {
                                         sendMsg(inventory, InfoType.ERROR, player, "upload.oriTrainerMismatch", "%pokemon%", pokemon.getDisplayName());
                                     }
                                 } else {
-                                    sendMsg(inventory, InfoType.ERROR, player, "upload.speciesMismatch", "%bingoPokemon%", bingoPokemon.species.getLocalizedName(), "%pokemon%", pokemon.getLocalizedName());
+                                    sendMsg(inventory, InfoType.ERROR, player, "upload.speciesMismatch", "%bingoPokemon%", DuckPokemonBingo.getVersionController().getSpeciesLocalizedName(bingoPokemon.species), "%pokemon%", pokemon.getLocalizedName());
                                 }
                             }
                         }
@@ -126,17 +133,17 @@ public class MainBingo implements InventoryHolder, Listener {
                 return;
             }
             //进行判断点击的是否为队伍宝可梦
-            if (NBTUtil.hasKey(clicked, "partySlot")) {
+            if (hasKey(clicked, "partySlot")) {
                 // 如果是则设置可拾取，放到鼠标上
-                int slot = NBTUtil.readIntegerNBT(clicked, "partySlot");
-                if (party.get(slot) != null) {
+                int slot = ItemStackProxy.readIntegerNBT(clicked, "partySlot");
+                if (DuckPokemonBingo.getVersionController().partyGet(party, slot) != null) {
                     event.setCancelled(false);
-                    refreshInGuiInfo(inventory, DuckPokemonBingo.getMessageManager().getString("inGuiText.selectParty", player, "%pokemon%", party.get(slot).getDisplayName()), InfoType.INFO);
+                    refreshInGuiInfo(inventory, DuckPokemonBingo.getMessageManager().getString("inGuiText.selectParty", player, "%pokemon%", DuckPokemonBingo.getVersionController().partyGet(party, slot).getDisplayName()), InfoType.INFO);
                 }
             }
-            if (NBTUtil.hasKey(clicked, "bingoReward")) {
-                String rewardId = NBTUtil.readStringNBT(clicked, "bingoReward");
-                String bingoId = NBTUtil.readStringNBT(clicked, "bingoId");
+            if (hasKey(clicked, "bingoReward")) {
+                String rewardId = ItemStackProxy.readStringNBT(clicked, "bingoReward");
+                String bingoId = ItemStackProxy.readStringNBT(clicked, "bingoId");
                 Bingo bingo = DuckPokemonBingo.bingoManager.getBingo(bingoId);
                 if (bingo != null) {
                     BingoReward reward = bingo.getReward(rewardId);
@@ -145,7 +152,7 @@ public class MainBingo implements InventoryHolder, Listener {
                 }
             }
         }
-        if ((event.getSlot() < 0 || event.getWhoClicked().getInventory().equals(event.getClickedInventory())) && event.getCursor() != null && NBTUtil.hasKey(event.getCursor(), "partySlot")) {
+        if ((event.getSlot() < 0 || event.getWhoClicked().getInventory().equals(event.getClickedInventory())) && event.getCursor() != null && hasKey(event.getCursor(), "partySlot")) {
             event.setCancelled(true);
         }
     }
@@ -173,8 +180,8 @@ public class MainBingo implements InventoryHolder, Listener {
             itemMeta.setDisplayName(StringUtil.format(reward.name, player, "%status%", reward.getStatusInfo()));
             itemMeta.setLore(StringUtil.format(reward.description, player));
             itemStack.setItemMeta(itemMeta);
-            itemStack = NBTUtil.writeStringNBT(itemStack, "bingoReward", reward.id);
-            itemStack = NBTUtil.writeStringNBT(itemStack, "bingoId", bingo.id);
+            itemStack = ItemStackProxy.writeStringNBT(itemStack, "bingoReward", reward.id);
+            itemStack = ItemStackProxy.writeStringNBT(itemStack, "bingoId", bingo.id);
             inventory.setItem(reward.slot, itemStack);
         }
     }
@@ -188,10 +195,10 @@ public class MainBingo implements InventoryHolder, Listener {
             bingo.updateAll(player, list);
         }
         for (BingoPokemon bingoPokemon : list) {
-            Pokemon pokemon = Pixelmon.pokemonFactory.create(bingoPokemon.species);
-            pokemon.setForm(0);
-            pokemon.setShiny(false);
-            ItemStack itemStack = PokemonUtil.getPhoto(pokemon);
+            Pokemon pokemon = DuckPokemonBingo.getVersionController().createPokemonFromSpecies(bingoPokemon.species);
+            DuckPokemonBingo.getVersionController().setForm(pokemon, 0);
+//            pokemon.setShiny(false);
+            ItemStack itemStack = DuckPokemonBingo.getVersionController().getPhoto(pokemon);
             ItemMeta itemMeta = itemStack.getItemMeta();
             String name = DuckPokemonBingo.getConfigManager().getString("icons.bingoPokemon.name", player,
                     "%pokemonName%", pokemon.getLocalizedName(),
@@ -206,20 +213,20 @@ public class MainBingo implements InventoryHolder, Listener {
                 itemMeta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
             }
             itemStack.setItemMeta(itemMeta);
-            itemStack = NBTUtil.writeIntegerNBT(itemStack, "bingoPokemonId", bingoPokemon.id);
-            itemStack = NBTUtil.writeStringNBT(itemStack, "bingoId", bingo.id);
+            itemStack = ItemStackProxy.writeIntegerNBT(itemStack, "bingoPokemonId", bingoPokemon.id);
+            itemStack = ItemStackProxy.writeStringNBT(itemStack, "bingoId", bingo.id);
             inventory.setItem(getSlot(bingoPokemon.id), itemStack);
         }
     }
 
     private static void refreshPartyPokemon(Inventory inventory, Player player) {
-        PlayerPartyStorage party = PokemonUtil.getParty(player);
-        Pokemon[] all = party.getAll();
+        Object party = DuckPokemonBingo.getVersionController().getParty(player);
+        Pokemon[] all = DuckPokemonBingo.getVersionController().partyGetAll(party);
         for (int i = 0; i < all.length; i++) {
             Pokemon pokemon = all[i];
             ItemStack itemStack;
             if (pokemon != null) {
-                itemStack = PokemonUtil.getPhoto(pokemon);
+                itemStack = DuckPokemonBingo.getVersionController().getPhoto(pokemon);
                 ItemMeta itemMeta = itemStack.getItemMeta();
                 String[] replacement = {
                         "%pokemonName%", pokemon.getDisplayName(),
@@ -228,7 +235,7 @@ public class MainBingo implements InventoryHolder, Listener {
                 itemMeta.setLore(DuckPokemonBingo.getConfigManager().getStringList("icons.partyPokemon.lore",
                         player, replacement));
                 itemStack.setItemMeta(itemMeta);
-                itemStack = NBTUtil.writeIntegerNBT(itemStack, "partySlot", i);
+                itemStack = ItemStackProxy.writeIntegerNBT(itemStack, "partySlot", i);
             } else {
                 Material material = Material.matchMaterial(DuckPokemonBingo.getConfigManager().getString("icons.noPokemon.material", player));
                 itemStack = new ItemStack(material != null ? material : Material.BARRIER);

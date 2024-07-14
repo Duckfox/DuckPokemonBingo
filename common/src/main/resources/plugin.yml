@@ -3,6 +3,7 @@ version: '${version}'
 main: com.duckfox.duckpokemonbingo.DuckPokemonBingo
 depend: [DuckAPI]
 authors: [Duck_fox]
+load: STARTUP
 commands:
   duckpokemonbingo:
     aliases: dpb

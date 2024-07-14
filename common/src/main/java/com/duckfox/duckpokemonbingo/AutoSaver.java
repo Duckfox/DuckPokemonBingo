@@ -1,11 +1,8 @@
 package com.duckfox.duckpokemonbingo;
 
-import com.duckfox.duckapi.DuckPlugin;
 import com.duckfox.duckpokemonbingo.api.Savable;
-import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.io.IOException;
 import java.util.HashSet;
 
 public final class AutoSaver {

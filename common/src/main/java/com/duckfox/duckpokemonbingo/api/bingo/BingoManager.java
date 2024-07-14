@@ -1,6 +1,5 @@
 package com.duckfox.duckpokemonbingo.api.bingo;
 
-import com.duckfox.duckapi.utils.PokemonUtil;
 import com.duckfox.duckpokemonbingo.DuckPokemonBingo;
 import org.bukkit.configuration.ConfigurationSection;
 
